@@ -1,23 +1,40 @@
 ---
 export interface Props {
   ranking: number;
-  name: string;
+  user: string;
   stars: number;
   score: number;
+  last_star_ts: number;
 }
 
-const { ranking, name, stars, score } = Astro.props;
+const { ranking, user, stars, score, last_star_ts } = Astro.props;
+
+const date = last_star_ts && new Date(last_star_ts * 1000);
+const hour = date && date.getHours();
+const dateStr = date && date.toLocaleString();
 ---
 
 <li class="card">
   <h2 class="header">
     #{ranking}
-    {name}
+    {user}
   </h2>
   <div class="score">
     {score} points
   </div>
   <div class="stars">{stars} stars</div>
+  <div
+    class:list={[
+      "last",
+      {
+        insane: date && hour < 7,
+        "early-bird": date && hour < 8,
+        "so-so": date && hour < 10,
+      },
+    ]}
+  >
+    {date ? `Last star at ${dateStr}` : ""}
+  </div>
 </li>
 <style>
   .card {
@@ -28,7 +45,7 @@ const { ranking, name, stars, score } = Astro.props;
     background-color: white;
     border-radius: 0.5rem;
     border: 1px solid rgba(var(--accent), 25%);
-    grid-template-areas: "header header" "score stars";
+    grid-template-areas: "header header" "last last" "score stars";
   }
   h2 {
     grid-area: header;
@@ -41,6 +58,19 @@ const { ranking, name, stars, score } = Astro.props;
   .stars {
     grid-area: stars;
     text-align: right;
+  }
+  .last {
+    grid-area: last;
+    font-weight: 500;
+  }
+  .last.so-so {
+    color: var(--so-so);
+  }
+  .last.early-bird {
+    color: var(--early-bird);
+  }
+  .last.insane {
+    color: var(--insane);
   }
   .card:is(:hover, :focus-within) h2 {
     color: rgb(var(--accent));

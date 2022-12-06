@@ -2,15 +2,23 @@
 import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
 
-type member = {
-  ranking?: number;
+type memberApiData = {
   name: string;
   local_score: number;
+  last_star_ts: number;
+  stars: number;
+};
+
+type member = {
+  ranking: number;
+  user: string;
+  score: number;
+  last_star_ts: number;
   stars: number;
 };
 
 type AoCData = {
-  members: Record<string, member>;
+  members: Record<string, memberApiData>;
   event: number;
 };
 
@@ -31,19 +39,21 @@ const response: Response = await fetch(
   requestOptions
 );
 const data: AoCData = await response.json();
-const members: members[] = Object.keys(data.members)
+const members: member[] = Object.keys(data.members)
   .map((key) => {
-    const { name, local_score, stars } = data.members[key];
+    const { name, local_score, stars, last_star_ts } = data.members[key];
     return {
-      name,
+      user: name,
       stars,
       score: local_score,
+      last_star_ts,
     };
   })
-  .sort((a, b) => (a.score > b.score ? -1 : 1));
+  .sort((a, b) => (a.score > b.score ? -1 : 1))
+  .map((member, ranking) => ({ ...member, ranking: ranking + 1 }));
 ---
 
-<Layout title="Welcome to Astro.">
+<Layout title="Advent of Code 2022">
   <main>
     <a href="https://adventofcode.com/"
       ><h1>Advent of Code <span>2022</span></h1>
@@ -56,16 +66,15 @@ const members: members[] = Object.keys(data.members)
     </p>
     <ul role="list" class="link-card-grid">
       {
-        members.map(({ name, score, stars }, position) => {
-          return (
-            <Card
-              name={name}
-              ranking={position + 1}
-              score={score}
-              stars={stars}
-            />
-          );
-        })
+        members.map(({ user, score, stars, ranking, last_star_ts }) => (
+          <Card
+            user={user}
+            ranking={ranking}
+            score={score}
+            stars={stars}
+            last_star_ts={last_star_ts}
+          />
+        ))
       }
     </ul>
   </main>
