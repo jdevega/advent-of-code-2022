@@ -1,0 +1,121 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Card from "../components/Card.astro";
+
+type member = {
+  ranking?: number;
+  name: string;
+  local_score: number;
+  stars: number;
+};
+
+type AoCData = {
+  members: Record<string, member>;
+  event: number;
+};
+
+var myHeaders = new Headers();
+myHeaders.append(
+  "Cookie",
+  "session=53616c7465645f5fcfb8e429f04ddf199bddc98365b838875f14c2f2520ccedc03d5903883859b27090beca13c88c8c490ef93b34e6c16d607dab9046607994d"
+);
+
+var requestOptions = {
+  method: "GET",
+  headers: myHeaders,
+  redirect: "follow",
+};
+
+const response: Response = await fetch(
+  "https://adventofcode.com/2022/leaderboard/private/view/1070402.json",
+  requestOptions
+);
+const data: AoCData = await response.json();
+const members: members[] = Object.keys(data.members)
+  .map((key) => {
+    const { name, local_score, stars } = data.members[key];
+    return {
+      name,
+      stars,
+      score: local_score,
+    };
+  })
+  .sort((a, b) => (a.score > b.score ? -1 : 1));
+---
+
+<Layout title="Welcome to Astro.">
+  <main>
+    <a href="https://adventofcode.com/"
+      ><h1>Advent of Code <span>2022</span></h1>
+    </a>
+    <p class="instructions">
+      This is the actual <a href="https://adventofcode.com/"
+        ><strong class="text-gradient">Advent of Code (AoC)</strong>
+      </a> ranking for 2022. If you want to participate, ask any of us for the code
+      to join our private board.
+    </p>
+    <ul role="list" class="link-card-grid">
+      {
+        members.map(({ name, score, stars }, position) => {
+          return (
+            <Card
+              name={name}
+              ranking={position + 1}
+              score={score}
+              stars={stars}
+            />
+          );
+        })
+      }
+    </ul>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 1.5rem;
+    max-width: 60ch;
+  }
+  a {
+    text-decoration: none;
+    text-align: center;
+  }
+  h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 0;
+  }
+  .text-gradient {
+    background-image: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 400%;
+    background-position: 0%;
+  }
+  .instructions {
+    line-height: 1.6;
+    margin: 1rem 0;
+    border: 1px solid rgba(var(--accent), 25%);
+    background-color: white;
+    padding: 1rem;
+    border-radius: 0.4rem;
+  }
+  .instructions code {
+    font-size: 0.875em;
+    font-weight: bold;
+    background: rgba(var(--accent), 12%);
+    color: rgb(var(--accent));
+    border-radius: 4px;
+    padding: 0.3em 0.45em;
+  }
+  .instructions strong {
+    color: rgb(var(--accent));
+  }
+  .link-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+    gap: 1rem;
+    padding: 0;
+  }
+</style>
