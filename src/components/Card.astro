@@ -1,13 +1,15 @@
 ---
+import github from "/github.svg";
 export interface Props {
   ranking: number;
   user: string;
   stars: number;
   score: number;
   last_star_ts: number;
+  repo?: string;
 }
 
-const { ranking, user, stars, score, last_star_ts } = Astro.props;
+const { ranking, user, stars, score, last_star_ts, repo } = Astro.props;
 
 const date = last_star_ts && new Date((last_star_ts + 60 * 60) * 1000);
 const hour = date && date.getHours();
@@ -23,6 +25,15 @@ const dateStr = date && date.toLocaleString();
     {score} points
   </div>
   <div class="stars">{stars} stars</div>
+  {
+    repo && (
+      <div class="repo">
+        <a href={repo}>
+          <img src={github} />
+        </a>
+      </div>
+    )
+  }
   <div
     class:list={[
       "last",
@@ -45,7 +56,7 @@ const dateStr = date && date.toLocaleString();
     background-color: white;
     border-radius: 0.5rem;
     border: 1px solid rgba(var(--accent), 25%);
-    grid-template-areas: "header header" "last last" "score stars";
+    grid-template-areas: "header header header" "last last last" "score repo stars";
   }
   h2 {
     grid-area: header;
@@ -58,6 +69,14 @@ const dateStr = date && date.toLocaleString();
   .stars {
     grid-area: stars;
     text-align: right;
+  }
+  .repo {
+    grid-area: repo;
+    text-align: center;
+  }
+  .repo img {
+    width: 20px;
+    height: 20px;
   }
   .last {
     grid-area: last;
@@ -73,6 +92,9 @@ const dateStr = date && date.toLocaleString();
     color: var(--insane);
   }
   .card:is(:hover, :focus-within) h2 {
+    color: rgb(var(--accent));
+  }
+  .card:is(:hover, :focus-within) img {
     color: rgb(var(--accent));
   }
 </style>

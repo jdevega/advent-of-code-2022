@@ -1,8 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
+import repos from "../data/repos.json";
 
 type memberApiData = {
+  id: number;
   name: string;
   local_score: number;
   last_star_ts: number;
@@ -15,6 +17,7 @@ type member = {
   score: number;
   last_star_ts: number;
   stars: number;
+  repo?: string;
 };
 
 type AoCData = {
@@ -41,14 +44,16 @@ const response: Response = await fetch(
 const data: AoCData = await response.json();
 const members: member[] = Object.keys(data.members)
   .map((key) => {
-    const { name, local_score, stars, last_star_ts } = data.members[key];
+    const { name, local_score, stars, last_star_ts, id } = data.members[key];
     return {
       user: name,
       stars,
       score: local_score,
       last_star_ts,
+      repo: repos[id],
     };
   })
+  .filter((member) => member.stars > 0)
   .sort((a, b) => (a.score > b.score ? -1 : 1))
   .map((member, ranking) => ({ ...member, ranking: ranking + 1 }));
 ---
@@ -66,13 +71,14 @@ const members: member[] = Object.keys(data.members)
     </p>
     <ul role="list" class="link-card-grid">
       {
-        members.map(({ user, score, stars, ranking, last_star_ts }) => (
+        members.map(({ user, score, stars, ranking, last_star_ts, repo }) => (
           <Card
             user={user}
             ranking={ranking}
             score={score}
             stars={stars}
             last_star_ts={last_star_ts}
+            repo={repo}
           />
         ))
       }
