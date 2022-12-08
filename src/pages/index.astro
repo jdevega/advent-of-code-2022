@@ -69,7 +69,7 @@ const members: member[] = Object.keys(data.members)
       </a> ranking for 2022. If you want to participate, ask any of us for the code
       to join our private board.
     </p>
-    <ul role="list" class="link-card-grid">
+    <ul role="list" class="grid">
       {
         members.map(({ user, score, stars, ranking, last_star_ts, repo }) => (
           <Card
@@ -127,7 +127,7 @@ const members: member[] = Object.keys(data.members)
   .instructions strong {
     color: rgb(var(--accent));
   }
-  .link-card-grid {
+  .grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
     gap: 1rem;

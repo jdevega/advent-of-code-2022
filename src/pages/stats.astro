@@ -1,0 +1,153 @@
+---
+import Layout from "../layouts/Layout.astro";
+import StatCard from "../components/StatCard.astro";
+import repos from "../data/repos.json";
+
+type memberApiData = {
+  id: number;
+  name: string;
+  local_score: number;
+  last_star_ts: number;
+  stars: number;
+};
+
+type member = {
+  ranking: number;
+  user: string;
+  score: number;
+  last_star_ts: number;
+  stars: number;
+  repo?: string;
+};
+
+type AoCData = {
+  members: Record<string, memberApiData>;
+  event: number;
+};
+
+var myHeaders = new Headers();
+myHeaders.append(
+  "Cookie",
+  "session=53616c7465645f5fcfb8e429f04ddf199bddc98365b838875f14c2f2520ccedc03d5903883859b27090beca13c88c8c490ef93b34e6c16d607dab9046607994d"
+);
+
+var requestOptions = {
+  method: "GET",
+  headers: myHeaders,
+  redirect: "follow",
+};
+
+const response: Response = await fetch(
+  "https://adventofcode.com/2022/leaderboard/private/view/1070402.json",
+  requestOptions
+);
+const data: AoCData = await response.json();
+const members: member[] = Object.keys(data.members)
+  .map((key) => {
+    const { name, local_score, stars, last_star_ts, id } = data.members[key];
+    return {
+      user: name,
+      stars,
+      score: local_score,
+      last_star_ts,
+      repo: repos[id],
+    };
+  })
+  .sort((a, b) => (a.score > b.score ? -1 : 1))
+  .map((member, ranking) => ({ ...member, ranking: ranking + 1 }));
+---
+
+<Layout title="AoC 2022 Stats">
+  <main>
+    <a href="https://adventofcode.com/"
+      ><h1>Advent of Code <span>2022</span></h1>
+    </a>
+    <h2>Stats</h2>
+    <ul class="grid">
+      <StatCard title="Members" value={members.length} />
+      <StatCard
+        title="Solution repositories"
+        value={Object.keys(repos).length}
+      />
+      <StatCard title="Gaps" fullWidth={true}>
+        <ul class="gaps">
+          <li class="gap headings">
+            <span>Ranking/User</span><span>Prev</span><span>Next</span><span
+              >Total</span
+            >
+          </li>
+          {
+            members.map((member, index) => {
+              const prevGap =
+                index === 0 ? 0 : member.score - members[index - 1].score;
+              const nextGap =
+                index === members.length - 1
+                  ? 0
+                  : member.score - members[index + 1].score;
+              return (
+                <li class="gap">
+                  <span>
+                    #{member.ranking} {member.user}
+                  </span>
+                  <span class="gap-value">{prevGap}</span>
+                  <span class="gap-value">{nextGap}</span>
+                  <span class="gap-value">{member.score}</span>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </StatCard>
+    </ul>
+  </main>
+
+  <style>
+    main {
+      margin: auto;
+      padding: 1.5rem;
+      max-width: 60ch;
+    }
+
+    a {
+      text-decoration: none;
+      text-align: center;
+    }
+    h1,
+    h2 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 0;
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(24ch, 1fr));
+      gap: 1rem;
+      padding: 0;
+    }
+
+    .gaps {
+      margin: 0;
+      padding: 0;
+    }
+    .gap {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: auto repeat(3, 50px);
+      font-size: 1rem;
+      list-style: none;
+      text-align: left;
+      margin: 0.4rem;
+    }
+    .headings {
+      font-weight: 600;
+      padding: 0.5rem 0;
+    }
+    .gap:not(.headings) {
+      border-bottom: 1px solid var(--divider);
+    }
+    .gap-value {
+      text-align: right;
+    }
+  </style>
+</Layout>
