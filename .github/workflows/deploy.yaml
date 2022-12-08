@@ -1,0 +1,12 @@
+name: deploy
+on:
+  schedule:
+    - cron: "0,20,40 6-23 * * *"
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Hit Vercel Deploy Hook
+        run: |
+          curl --request GET \
+          --url 'https://api.vercel.com/v1/integrations/deploy/prj_P0WyJQ5G4C72OgfQswxtGRGPiqwR/cnaISHuqIy'
