@@ -13,7 +13,7 @@ const { ranking, user, stars, score, last_star_ts, repo } = Astro.props;
 
 const date = last_star_ts && new Date((last_star_ts + 60 * 60) * 1000);
 const hour = date && date.getHours();
-const dateStr = date && date.toLocaleString();
+const dateStr = date && date.toLocaleString("es-ES");
 ---
 
 <li class="card">
